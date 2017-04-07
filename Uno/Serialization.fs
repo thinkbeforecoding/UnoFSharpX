@@ -102,16 +102,18 @@ let serializer =
 
 let serializeObj o =
     use stream = new IO.MemoryStream()
-    use writer = new IO.StreamWriter(stream)
-
+    use streamWriter = new IO.StreamWriter(stream)
+    use writer = new JsonTextWriter(streamWriter)
+    // use writer = new IO.StringWriter()
     serializer.Serialize(writer, o)
+    writer.Flush()
     stream.ToArray()
 
-let deserializeObj<'t> data : 't =
+let deserializeObj objType data  =
     use stream = new IO.MemoryStream(data: byte[])
     use streamReader = new IO.StreamReader(stream, true)
     use reader = new JsonTextReader(streamReader)
-    serializer.Deserialize<'t>(reader)
+    serializer.Deserialize(reader, objType)
 
 
 let serialize (event:'e) = 
@@ -125,10 +127,11 @@ let deserialize<'e> (eventType, data): 'e list =
     |> Array.tryFind (fun c -> c.Name = eventType)
     |> function
         | Some case ->
+                let fieldType = case.GetFields().[0].PropertyType
                 [ 
                     FSharpValue.MakeUnion(
                         case, 
-                        [| deserializeObj<'e> data |> box |])
+                        [| deserializeObj fieldType data |])
                     |> unbox 
                     ]
         | None -> []
