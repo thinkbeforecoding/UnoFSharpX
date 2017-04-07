@@ -1,0 +1,10 @@
+
+source https://api.nuget.org/v3/index.json
+
+nuget FSharp.Core
+nuget Expecto
+nuget EventStore.Client
+nuget Newtonsoft.Json
+group Build
+source https://api.nuget.org/v3/index.json
+nuget Fake

@@ -392,3 +392,4 @@ paket-files/
 *.sln.iml
 
 eventstore/
+packages/
