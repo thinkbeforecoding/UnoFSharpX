@@ -7,4 +7,6 @@ type Digit = Zero | One | Two | Three | Four | Five | Six | Seven | Height | Nin
 
 type Card =
     | Digit of Color * Digit
+//  | KickBack of Color
+//  | Jump of Color   
 

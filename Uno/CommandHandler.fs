@@ -5,7 +5,7 @@ open Game
 [<Struct>]
 type GameId = GameId of int
 
-// Step 15:
+// Step 16:
 // Implement the command handler
 let handle readEvents appendEvents id command =
     async {
@@ -13,8 +13,8 @@ let handle readEvents appendEvents id command =
         failwith "Not implemented"
     }
 
-// Step 16:
+// Step 17:
 // Add keep state in memory
 
-// Step 17:
+// Step 18:
 // Implement Snapshoting

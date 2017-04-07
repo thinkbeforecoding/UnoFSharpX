@@ -97,12 +97,16 @@ let tests =
     // Step 14:
     // Missing an interrupt is not concidered as playing at the wrong turn.
     // So what happens here ?
-    testCase "Player can interrupt" <| fun _ ->
+    testCase "Player get no penalty when missing an interrupt" <| fun _ ->
       [ GameStarted { PlayerCount = 4; FirstCard = digit Red Five } // <- there are 4 players
         CardPlayed { Player = 1; Card = digit Red Three } // <- this is the card player 0 tries to interrupt
         CardPlayed { Player = 2; Card = digit Blue Three }] // <- but player 2 plays too fast
       => PlayCard { Player = 0; Card = digit Red Three } // <- it is not player's 0 turn, but we can see he tried to interrupt on previous card
       // ..
 
+
+    // Step 15:
+    // Uncomment the Kickback card and implement it.
+    // The kickback changes the direction of the game.
     
   ]
