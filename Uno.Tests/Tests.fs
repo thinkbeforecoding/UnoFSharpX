@@ -5,7 +5,11 @@ open Game
 
 // Step 3:
 // Implement => to make the test run
-let (=>) events command = failwith "not implemented"
+let (=>) events command = 
+  events
+  |> List.fold evolve InitialState
+  |> decide command
+
 let (==) actual expected = Expect.equal actual (Ok expected) "Events should match" 
 
 let (=!) actual error = Expect.equal actual (Error error) "Errors should match"
@@ -21,7 +25,8 @@ let tests =
     testCase "The game can be started in initial state" <| fun _ ->
       []
       => StartGame { PlayerCount = 2; FirstCard = digit Red Three }
-      == GameStarted { PlayerCount = 2; FirstCard = digit Red Three}
+      == [ GameStarted { PlayerCount = 2; FirstCard = digit Red Three}
+           TurnStarted { Player = 1 } ]
 
     // Step 5:
     // Change the decide function to make this test pass
@@ -43,12 +48,14 @@ let tests =
     testCase "Card with same value can be played" <| fun _ ->
       [GameStarted { PlayerCount = 3; FirstCard = digit Red Five}]
       => PlayCard { Player = 1; Card = digit Green Five }
-      == [ CardPlayed { Player = 1; Card = digit Green Five}]
+      == [ CardPlayed { Player = 1; Card = digit Green Five}
+           TurnStarted { Player = 2 }]
 
     testCase "Card with same color can be played" <| fun _ ->
       [GameStarted { PlayerCount = 3; FirstCard = digit Red Five}]
       => PlayCard { Player = 1; Card = digit Red Nine }
-      == [ CardPlayed { Player = 1; Card = digit Red Nine }]
+      == [ CardPlayed { Player = 1; Card = digit Red Nine }
+           TurnStarted { Player = 2 }]
 
     // Step 8:
     // Make this test pass
@@ -61,7 +68,8 @@ let tests =
     // What happens here ?!
     testCase "Card should be same color or same value" <| fun _ ->
       [GameStarted { PlayerCount = 3; FirstCard = digit Red Five }]
-      => PlayCard {Player = 1; Card = digit Green Seven }
+      => PlayCard { Player = 1; Card = digit Green Seven }
+      == [ WrongCardPlayed { Player = 1; Card = digit Green Seven}]
       // ...
 
     // Step 10:
@@ -69,16 +77,29 @@ let tests =
     testCase "Player should play during his turn" <| fun _ ->
       [GameStarted { PlayerCount = 3; FirstCard = digit Red Five }]
       => PlayCard { Player = 2; Card = digit Red Height }
-      // ..
+      == [PlayerPlayedAtWrongTurn { Player = 2; Card = digit Red Height}]
 
     // Step 11:
     // Testing a full round
     testCase "The after a table round, the dealer plays" <| fun _ ->
       [ GameStarted { PlayerCount = 3; FirstCard = digit Red Five }
+        TurnStarted { Player = 1 }
         CardPlayed { Player = 1; Card = digit Red Three }
-        CardPlayed { Player = 2; Card = digit Blue Three}]
+        TurnStarted { Player = 2 }
+        CardPlayed { Player = 2; Card = digit Blue Three}
+        TurnStarted { Player = 0 }]
       => PlayCard { Player = 0; Card = digit Blue Six }
-      == [ CardPlayed { Player = 0; Card = digit Blue Six }]
+      == [ CardPlayed { Player = 0; Card = digit Blue Six }
+           TurnStarted { Player = 1 }]
+
+    testCase "The after a table round, the dealer turn start" <| fun _ ->
+      [ GameStarted { PlayerCount = 3; FirstCard = digit Red Five }
+        TurnStarted { Player = 1 }
+        CardPlayed { Player = 1; Card = digit Red Three }
+        TurnStarted { Player = 2 } ]
+      => PlayCard { Player = 2; Card = digit Red Six }
+      == [ CardPlayed { Player = 2; Card = digit Red Six }
+           TurnStarted { Player = 0 }]
   
     // Step 12:
     // Look at the evolve function...
@@ -102,7 +123,7 @@ let tests =
         CardPlayed { Player = 1; Card = digit Red Three } // <- this is the card player 0 tries to interrupt
         CardPlayed { Player = 2; Card = digit Blue Three }] // <- but player 2 plays too fast
       => PlayCard { Player = 0; Card = digit Red Three } // <- it is not player's 0 turn, but we can see he tried to interrupt on previous card
-      // ..
+      == [ InterruptMissed { Player = 0; Card = digit Red Three}] // ..
 
 
     // Step 15:
