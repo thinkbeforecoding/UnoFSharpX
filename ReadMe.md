@@ -1,5 +1,7 @@
 # Uno Workshop for FSharpX
 
+This repository has moved to Codeberg: https://codeberg.org/thinkbeforecoding/UnoFSharpX
+
 This is the code we will start with for the FSharpX Functional Event Sourcing workshop.
 
 Just follow the steps in order !
